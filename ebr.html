@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EBR Calc</title>
+  <style>
+    :root {
+      --primary: #0066cc;
+      --danger: #e63946;
+      --background: #f9fafa;
+      --card-bg: #ffffff;
+      --border-color: #d1dce5;
+      --text-color: #333;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background);
+      color: var(--text-color);
+      margin: 2em auto;
+      max-width: 1000px;
+      padding: 0 1em;
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary);
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin-bottom: 1em;
+    }
+    .row > label {
+      flex: 1;
+      min-width: 150px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+    }
+    select, input {
+      padding: 0.5em;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      margin-top: 0.3em;
+    }
+    .passenger-entry {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1.5em;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 2em;
+    }
+    .remove-passenger {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 0.3em 0.7em;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .baggage-entry {
+      background: #f0f4f8;
+      padding: 1em;
+      border-radius: 6px;
+    }
+    .baggage-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      border: 1px dashed var(--border-color);
+      padding: 0.5em;
+      border-radius: 6px;
+      align-items: center;
+      margin-top: 0.5em;
+      background: #fff;
+    }
+    .delete-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5em 1em;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background: #a00;
+    }
+    button {
+      padding: 0.5em 1.2em;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1em;
+    }
+    button:hover {
+      background: #005bb5;
+    }
+    #rateTables {
+      display: none;
+      margin: 1em 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 1em;
+      border-radius: 8px;
+      max-height: 400px;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1em;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    h3, h4 {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <h1>EBR Calc</h1>
+<button type="button" style="margin-bottom: 1em;" onclick="toggleRates()">📊 Show/Hide Rate Tables</button>
+
+<div id="rateTables" style="display:none; margin-top: 1em; background: #fff; border: 1px solid #ccc; padding: 1em; border-radius: 8px; max-height: 400px; overflow: auto;">
+  <h3>Extra Piece (KWD)</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr><th></th><th>KUWAIT</th><th>GCC</th><th>MD EAST</th><th>ISC</th><th>EUROPE</th><th>USA</th><th>FAR EAST</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>KUWAIT</td><td>-</td><td>25</td><td>30</td><td>40</td><td>45</td><td>65</td><td>55</td></tr>
+      <tr><td>GCC</td><td>25</td><td>30</td><td>40</td><td>50</td><td>55</td><td>75</td><td>65</td></tr>
+      <tr><td>MD EAST</td><td>30</td><td>40</td><td>45</td><td>50</td><td>55</td><td>70</td><td>60</td></tr>
+      <tr><td>ISC</td><td>40</td><td>50</td><td>50</td><td>-</td><td>55</td><td>70</td><td>65</td></tr>
+      <tr><td>EUROPE</td><td>45</td><td>55</td><td>55</td><td>55</td><td>-</td><td>95</td><td>65</td></tr>
+      <tr><td>USA</td><td>65</td><td>75</td><td>70</td><td>70</td><td>95</td><td>-</td><td>85</td></tr>
+      <tr><td>FAR EAST</td><td>55</td><td>65</td><td>60</td><td>65</td><td>65</td><td>85</td><td>-</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Oversized (KWD)</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr><th></th><th>KUWAIT</th><th>GCC</th><th>MD EAST</th><th>ISC</th><th>EUROPE</th><th>USA</th><th>FAR EAST</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>KUWAIT</td><td>-</td><td>10</td><td>12</td><td>16</td><td>18</td><td>26</td><td>22</td></tr>
+      <tr><td>GCC</td><td>10</td><td>12</td><td>16</td><td>20</td><td>22</td><td>30</td><td>26</td></tr>
+      <tr><td>MD EAST</td><td>12</td><td>16</td><td>18</td><td>20</td><td>22</td><td>28</td><td>24</td></tr>
+      <tr><td>ISC</td><td>16</td><td>20</td><td>20</td><td>-</td><td>22</td><td>28</td><td>26</td></tr>
+      <tr><td>EUROPE</td><td>18</td><td>22</td><td>22</td><td>22</td><td>-</td><td>38</td><td>26</td></tr>
+      <tr><td>USA</td><td>26</td><td>30</td><td>28</td><td>28</td><td>38</td><td>-</td><td>34</td></tr>
+      <tr><td>FAR EAST</td><td>22</td><td>26</td><td>24</td><td>26</td><td>26</td><td>34</td><td>-</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Overweight (KWD)</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr><th></th><th>KUWAIT</th><th>GCC</th><th>MD EAST</th><th>ISC</th><th>EUROPE</th><th>USA</th><th>FAR EAST</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>KUWAIT</td><td>-</td><td>10</td><td>12</td><td>16</td><td>18</td><td>26</td><td>22</td></tr>
+      <tr><td>GCC</td><td>10</td><td>12</td><td>16</td><td>20</td><td>22</td><td>30</td><td>26</td></tr>
+      <tr><td>MD EAST</td><td>12</td><td>16</td><td>18</td><td>20</td><td>22</td><td>28</td><td>24</td></tr>
+      <tr><td>ISC</td><td>16</td><td>20</td><td>20</td><td>-</td><td>22</td><td>28</td><td>26</td></tr>
+      <tr><td>EUROPE</td><td>18</td><td>22</td><td>22</td><td>22</td><td>-</td><td>38</td><td>26</td></tr>
+      <tr><td>USA</td><td>26</td><td>30</td><td>28</td><td>28</td><td>38</td><td>-</td><td>34</td></tr>
+      <tr><td>FAR EAST</td><td>22</td><td>26</td><td>24</td><td>26</td><td>26</td><td>34</td><td>-</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+  <form id="passengerForm">
+    <div id="passengerContainer"></div>
+    <button type="button" id="addPassengerBtn">+ Add Passenger</button>
+  </form>
+
+  <script>
+    function toggleRates() {
+      const rates = document.getElementById('rateTables');
+      rates.style.display = rates.style.display === 'none' ? 'block' : 'none';
+    }
+
+    const container = document.getElementById('passengerContainer');
+    const addBtn = document.getElementById('addPassengerBtn');
+    let passengerCount = 0;
+
+    function addPassenger() {
+      passengerCount++;
+      const div = document.createElement('div');
+      div.className = 'passenger-entry';
+      div.innerHTML = `
+        <button class="remove-passenger" onclick="this.parentElement.remove()">×</button>
+        <label>Passenger Name
+          <input type="text" name="passengerName" placeholder="Passenger ${passengerCount}">
+        </label>
+
+        <div class="row">
+          <label>From
+            <select name="zoneSrc">
+              <option value="KUWAIT">Kuwait</option>
+              <option value="GCC">GCC</option>
+              <option value="MD_EAST">MD East</option>
+              <option value="ISC">ISC</option>
+              <option value="EUROPE">Europe</option>
+              <option value="USA">USA</option>
+              <option value="FAR_EAST">Far East</option>
+            </select>
+          </label>
+          <label>To
+            <select name="zoneDest">
+              <option value="KUWAIT">Kuwait</option>
+              <option value="GCC">GCC</option>
+              <option value="MD_EAST">MD East</option>
+              <option value="ISC">ISC</option>
+              <option value="EUROPE">Europe</option>
+              <option value="USA">USA</option>
+              <option value="FAR_EAST">Far East</option>
+            </select>
+          </label>
+          <label>Passenger Type
+            <select name="type">
+              <option value="adult">Adult</option>
+              <option value="child">Child (2–12)</option>
+              <option value="infant">Infant (0–2)</option>
+              <option value="wheelchair">Wheelchair</option>
+            </select>
+          </label>
+          <label>Ticket Class
+            <select name="ticketClass">
+              <option value="royal">Royal (R/C)</option>
+              <option value="first">First (F/C)</option>
+              <option value="business">Business (J/C)</option>
+              <option value="economy">Economy (Y/C)</option>
+            </select>
+          </label>
+          <label>OASIS Membership
+            <select name="membership">
+              <option value="none">None</option>
+              <option value="blue">Blue</option>
+              <option value="silver">Silver</option>
+              <option value="gold">Gold</option>
+              <option value="platinum">Platinum</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="baggage-entry">
+          <h4>Baggage Details</h4>
+          <div class="baggage-list"></div>
+          <button type="button" onclick="addBaggageRow(this)">+ Add Baggage</button>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function addBaggageRow(button) {
+      const list = button.parentElement.querySelector('.baggage-list');
+      const baggageCount = list.children.length + 1;
+      const row = document.createElement('div');
+      row.className = 'baggage-row';
+      row.innerHTML = `
+        <strong>#${baggageCount}</strong>
+        <label>Type
+          <select name="baggageType">
+            <option value="bag">Bag</option>
+            <option value="box">Box</option>
+            <option value="wheelchair">Wheelchair</option>
+            <option value="stroller">Stroller</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>Weight (kg): <input type="number" name="baggageWeight" step="0.1"></label>
+        <label>Size (cm): <input type="number" name="baggageSize"></label>
+        <button type="button" class="delete-btn" onclick="this.parentElement.remove()">Delete</button>
+      `;
+      list.appendChild(row);
+    }
+
+    addBtn.addEventListener('click', addPassenger);
+    addPassenger();
+  </script>
+<script>
+// logic.js (updated: infant max 10kg strictly enforced)
+
+const zoneMatrix = ["KUWAIT", "GCC", "MD-EAST", "ISC", "EUROPE", "USA", "FAR-EAST"];
+
+const extraPieceRates = {
+  "KUWAIT": [0, 25, 30, 40, 45, 65, 55],
+  "GCC": [25, 30, 40, 50, 55, 75, 65],
+  "MD-EAST": [30, 40, 45, 50, 55, 70, 60],
+  "ISC": [40, 50, 50, 0, 55, 70, 65],
+  "EUROPE": [45, 55, 55, 55, 0, 95, 65],
+  "USA": [65, 75, 70, 70, 95, 0, 85],
+  "FAR-EAST": [55, 65, 60, 65, 65, 85, 0]
+};
+
+const oversizeRates = {
+  "KUWAIT":    [0,  10, 12, 16, 18, 26, 22],
+  "GCC":       [10, 12, 16, 20, 22, 30, 26],
+  "MD-EAST":   [12, 16, 18, 20, 22, 28, 24],
+  "ISC":       [16, 20, 20, 0,  22, 28, 26],
+  "EUROPE":    [18, 22, 22, 22, 0,  38, 26],
+  "USA":       [26, 30, 28, 28, 38, 0,  34],
+  "FAR-EAST":  [22, 26, 24, 26, 26, 34, 0]
+};
+
+const overweightRates = { ...oversizeRates };
+
+function getClassAllowance(ticketClass) {
+  const map = {
+    royal: { pieces: 3, weight: 32, size: 250 },
+    first: { pieces: 3, weight: 32, size: 250 },
+    business: { pieces: 2, weight: 32, size: 158 },
+    economy: { pieces: 2, weight: 23, size: 158 }
+  };
+  return map[ticketClass] || { pieces: 0, weight: 0, size: 0 };
+}
+
+function getMembershipBonus(membership) {
+  if (membership === "silver") return { extraPieces: 1, extraWeight: 0, type: "silver", maxWeight: 23 };
+  if (membership === "gold") return { extraPieces: 1, extraWeight: 9, type: "gold", maxWeight: 23 };
+  if (membership === "platinum") return { extraPieces: 1, extraWeight: 9, type: "platinum", maxWeight: 32 };
+  return { extraPieces: 0, extraWeight: 0, type: "none", maxWeight: 0 };
+}
+
+function calculateRates(from, to, flags) {
+  const normalize = s => s.replace(/_/g, '-').toUpperCase();
+  const i = zoneMatrix.indexOf(normalize(from));
+  const j = zoneMatrix.indexOf(normalize(to));
+  if (i === -1 || j === -1) return { cost: 0, breakdown: [] };
+  let cost = 0;
+  let breakdown = [];
+  if (flags.extraPiece) {
+    const rate = extraPieceRates[zoneMatrix[i]][j];
+    if (rate != null) {
+      cost += rate;
+      breakdown.push(`Extra Piece ${rate} KWD`);
+    }
+  }
+  if (flags.oversize) {
+    const rate = oversizeRates[zoneMatrix[i]][j];
+    if (rate != null) {
+      cost += rate;
+      breakdown.push(`Oversize ${rate} KWD`);
+    }
+  }
+  if (flags.overweight) {
+    const rate = overweightRates[zoneMatrix[i]][j];
+    if (rate != null) {
+      cost += rate;
+      breakdown.push(`Overweight ${rate} KWD`);
+    }
+  }
+  return { cost, breakdown };
+}
+
+function updatePassengerFlags() {
+  const passengers = document.querySelectorAll(".passenger-entry");
+  passengers.forEach(passenger => {
+    const ticketClass = passenger.querySelector("[name='ticketClass']").value;
+    const membership = passenger.querySelector("[name='membership']").value;
+    const passengerType = passenger.querySelector("[name='type']").value;
+    const from = passenger.querySelector("[name='zoneSrc']").value;
+    const to = passenger.querySelector("[name='zoneDest']").value;
+
+    const baggageList = passenger.querySelectorAll(".baggage-row");
+    const allowance = getClassAllowance(ticketClass);
+    const bonus = getMembershipBonus(membership);
+
+    const isInfant = passengerType === 'infant';
+    const isWheelchairPax = passengerType === 'wheelchair';
+
+    const maxSize = isInfant ? 115 : allowance.size;
+
+    let wheelchairsUsed = 0;
+    let strollers = 0;
+    let countedPieces = 0;
+    let usedExtraPieceOption = false;
+    let usedWeightBonus = 0;
+
+    let summary = {
+      extraPiece: 0,
+      oversize: 0,
+      overweight: 0,
+      notAllowed: 0,
+      total: 0,
+      breakdown: []
+    };
+
+    baggageList.forEach((row, index) => {
+      const weight = parseFloat(row.querySelector("[name='baggageWeight']").value) || 0;
+      const size = parseFloat(row.querySelector("[name='baggageSize']").value) || 0;
+      const type = row.querySelector("[name='baggageType']").value;
+
+      let flags = [];
+      let rateFlags = { extraPiece: false, oversize: false, overweight: false };
+
+      const isWheelchair = type === 'wheelchair';
+      const isStroller = type === 'stroller';
+
+      if (isStroller) strollers++;
+
+      if (weight > 32) {
+        flags.push("❌ Over 32kg - Not Allowed");
+        summary.notAllowed++;
+      }
+
+      if (size > 250) {
+        flags.push("❌ Over 250cm - Not Allowed");
+        summary.notAllowed++;
+      } else if (size > maxSize) {
+        if (isInfant) {
+          flags.push("❌ Over 115cm - Not Allowed for Infants");
+          summary.notAllowed++;
+        } else {
+          flags.push("📐Oversize");
+          summary.oversize++;
+          rateFlags.oversize = true;
+        }
+      }
+
+      if (isInfant && weight > 10) {
+        flags.push("❌ Over 10kg - Not Allowed for Infants");
+        summary.notAllowed++;
+      }
+
+      let isFreeWheelchair = false;
+      if (isWheelchair && isWheelchairPax && wheelchairsUsed < 1) {
+        isFreeWheelchair = true;
+        wheelchairsUsed++;
+      }
+
+      const isExcessStroller = isStroller && !(passengerType === 'child' || passengerType === 'infant') || strollers > 1;
+      const countable = !isFreeWheelchair;
+      if (countable) countedPieces++;
+
+      const allowedPieces = isInfant ? 1 : allowance.pieces;
+      let maxWeightPerPiece = isInfant ? 10 : allowance.weight;
+
+      if (!isInfant && weight > maxWeightPerPiece) {
+        if ((bonus.type === 'gold' || bonus.type === 'platinum') && bonus.extraWeight > 0 && usedExtraPieceOption === false && usedWeightBonus < 2) {
+          if (weight <= (maxWeightPerPiece + bonus.extraWeight)) {
+            usedWeightBonus++;
+          } else {
+            flags.push("⚖️Overweight");
+            summary.overweight++;
+            rateFlags.overweight = true;
+          }
+        } else {
+          flags.push("⚖️Overweight");
+          summary.overweight++;
+          rateFlags.overweight = true;
+        }
+      }
+
+      const isExtraPiece = countable && countedPieces > allowedPieces;
+      if (isExtraPiece) {
+        if (isInfant) {
+          flags.push("❌ Extra Piece - Not Allowed for Infants");
+          summary.notAllowed++;
+        } else if ((bonus.extraPieces > 0 && bonus.type !== 'none') && usedWeightBonus === 0 && usedExtraPieceOption === false) {
+          usedExtraPieceOption = true;
+        } else {
+          flags.push("➕Extra Piece");
+          summary.extraPiece++;
+          rateFlags.extraPiece = true;
+        }
+      }
+
+      const { cost, breakdown } = calculateRates(from, to, rateFlags);
+      summary.total += cost;
+      if (breakdown.length) {
+        summary.breakdown.push(`#${index + 1}: ` + breakdown.join(" + "));
+      }
+
+      let flagElement = row.querySelector(".baggage-flags");
+      if (!flagElement) {
+        flagElement = document.createElement("div");
+        flagElement.className = "baggage-flags";
+        flagElement.style.color = "red";
+        flagElement.style.marginTop = "0.5em";
+        row.appendChild(flagElement);
+      }
+      flagElement.textContent = flags.join(" | ");
+    });
+
+    let summaryBox = passenger.querySelector(".summary-box");
+    if (!summaryBox) {
+      summaryBox = document.createElement("div");
+      summaryBox.className = "summary-box";
+      summaryBox.style.marginTop = "1em";
+      summaryBox.style.padding = "0.5em";
+      summaryBox.style.background = "#e0f0ff";
+      summaryBox.style.border = "1px solid #0077cc";
+      passenger.appendChild(summaryBox);
+    }
+    summaryBox.innerHTML = `
+      <strong>Summary:</strong><br>
+      Extra Pieces: ${summary.extraPiece}<br>
+      Oversized: ${summary.oversize}<br>
+      Overweight: ${summary.overweight}<br>
+      Not Allowed: ${summary.notAllowed}<br>
+      ${summary.breakdown.length ? "<br><u>Breakdown:</u><br>" + summary.breakdown.join("<br>") + "<br>" : ""}
+      <strong>Total Charges: ${summary.total.toFixed(2)} KWD</strong>
+    `;
+  });
+}
+
+document.addEventListener("input", function (e) {
+  if (
+    e.target.name === 'baggageWeight' ||
+    e.target.name === 'baggageSize' ||
+    e.target.name === 'baggageType' ||
+    e.target.name === 'type' ||
+    e.target.name === 'ticketClass' ||
+    e.target.name === 'membership' ||
+    e.target.name === 'zoneSrc' ||
+    e.target.name === 'zoneDest'
+  ) {
+    updatePassengerFlags();
+  }
+});
+
+</script>
+<script>
+// List of jokes
+const jokes = [
+  '"Never give up on your dreams… unless your dream is to juggle flaming chainsaws. Then maybe reconsider." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to serenade a pack of hyenas. Then maybe reconsider." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to race a mountain goat uphill. Some lines you don’t cross." – Khaled N',
+    '"Never give up on your dreams… unless you plan to host a tea party for tarantulas. Seriously, just no." – Khaled N',
+    '"Never give up on your dreams… unless that dream involves napping on an anthill. Under no circumstances." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to play tag with a swarm of piranhas. Trust me." – Khaled N',
+    '"Never give up on your dreams… unless you’re dreaming of using a porcupine as a pillow. Some lines you don’t cross." – Khaled N',
+    '"Never give up on your dreams… unless one dream is to high‑five a fire tornado. Hard pass." – Khaled N',
+    '"Never give up on your dreams… unless you’re trying to outrun a nuclear meltdown. Then maybe reconsider." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to carpet‑surf down an active volcano. Under no circumstances." – Khaled N',
+    '"Never give up on your dreams… unless it involves teaching alligators synchronized swimming. Trust me." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to challenge a swarm of hornets to a dance‑off. Hard pass." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to host a tea party for scorpions. Then maybe reconsider." – Khaled N',
+    '"Never give up on your dreams… unless your dream is to outrun a landslide. Then maybe reconsider." – Khaled N'
+];
+
+// Pick one at random
+const choice = jokes[Math.floor(Math.random() * jokes.length)];
+
+// When the DOM is ready, create & style the footer element
+window.addEventListener('DOMContentLoaded', () => {
+  const footer = document.createElement('div');
+  footer.textContent = choice;
+  Object.assign(footer.style, {
+    position: 'fixed',
+    bottom: '5px',
+    left: '0',
+    width: '100%',
+    textAlign: 'center',
+    fontSize: '0.6rem',
+    color: '#666',
+    pointerEvents: 'none',      // makes it non‑interactive
+    zIndex: '9999'
+  });
+  document.body.appendChild(footer);
+});
+</script>
+</body>
+</html>
